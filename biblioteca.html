@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biblioteca UI</title>
+    
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* =========================================================
+     ESTILOS EXCLUSIVOS DE LA BIBLIOTECA
+     (no tocan ninguna clase del sistema Apex; solo maquetan
+     la documentación reutilizando las variables existentes)
+     ========================================================= */
+  .lib-header {
+    position: sticky; top: 0; z-index: 200;
+    background: rgba(24,24,26,0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(246,246,254,0.08);
+    padding: var(--space-3) 0;
+  }
+  .lib-header-inner {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-4);
+  }
+  .lib-title { font-family: var(--font-display); font-size: 1.125rem; text-transform: uppercase; letter-spacing: 0.02em; }
+  .lib-title span { color: var(--c-accent-hover); }
+  .lib-nav { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+  .lib-nav a {
+    font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--c-text-muted-on-dark); transition: color var(--transition-fast);
+  }
+  .lib-nav a:hover { color: var(--c-accent-hover); }
+
+  .lib-intro { padding-top: var(--space-8); padding-bottom: var(--space-6); }
+  .lib-intro p { max-width: 62ch; font-size: 1.0625rem; color: var(--c-text-muted-on-dark); }
+
+  .lib-section-title {
+    display: flex; align-items: baseline; gap: var(--space-2);
+    margin-bottom: var(--space-6); padding-bottom: var(--space-2);
+    border-bottom: 2px solid var(--c-accent);
+  }
+  .lib-section-title .eyebrow { color: var(--c-accent); margin: 0; }
+  .lib-section-title h2 { font-size: clamp(1.5rem, 2vw, 2rem); }
+  .section-light .lib-section-title h2 { color: var(--c-black); }
+
+  .lib-block { margin-bottom: var(--space-10); }
+  .lib-block:last-child { margin-bottom: 0; }
+  .lib-block-label {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--c-accent); margin-bottom: var(--space-3); margin-top: var(--space-3);
+  }
+  .section-dark .lib-block-label { color: var(--c-accent-hover); }
+
+  /* Specimen tipográfico */
+  .specimen {
+    display: grid; grid-template-columns: 1fr auto; gap: var(--space-4);
+    align-items: end; padding: var(--space-4) 0;
+    border-bottom: 1px solid rgba(246,246,254,0.08);
+  }
+  .section-light .specimen { border-bottom: 1px solid rgba(24,24,26,0.1); }
+  .specimen:last-child { border-bottom: none; }
+  .specimen-sample { overflow-wrap: anywhere; }
+  .specimen-meta {
+    text-align: right; font-family: var(--font-body); font-size: 0.8125rem;
+    color: var(--c-text-muted-on-dark); line-height: 1.6; white-space: nowrap;
+  }
+  .section-light .specimen-meta { color: var(--c-text-muted-on-light); }
+  .specimen-meta b { color: var(--c-white); display: block; font-size: 0.875rem; }
+  .section-light .specimen-meta b { color: var(--c-black); }
+
+  /* Paleta */
+  .swatch-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-3);
+  }
+  .swatch {
+    border-radius: var(--radius-md); overflow: hidden;
+    border: 1px solid rgba(246,246,254,0.1);
+  }
+  .swatch-color { height: 84px; }
+  .swatch-info { padding: var(--space-2) var(--space-3); background: var(--c-black-soft); }
+  .swatch-name { font-size: 0.875rem; font-weight: 600; color: var(--c-white); margin-bottom: 2px; }
+  .swatch-code { font-size: 0.75rem; color: var(--c-text-muted-on-dark); font-family: monospace; }
+
+  /* Grillas de demo genéricas */
+  .demo-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
+  .demo-row:last-child { margin-bottom: 0; }
+  .demo-caption { font-size: 0.8125rem; color: var(--c-text-muted-on-dark); margin-top: var(--space-2); }
+  .section-light .demo-caption { color: var(--c-text-muted-on-light); }
+
+  .lib-2col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); }
+  .lib-3col { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
+
+  .img-frame {
+    aspect-ratio: 4/3; border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--c-black-soft), #3a3a42);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--c-text-muted-on-dark); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em;
+    overflow: hidden;
+  }
+
+  .radius-demo {
+    width: 96px; height: 96px; background: var(--c-accent);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--c-white); font-size: 0.75rem; font-weight: 600;
+  }
+
+  .spacing-demo { display: flex; align-items: flex-end; gap: var(--space-2); flex-wrap: wrap; }
+  .spacing-bar { background: var(--c-accent); width: 24px; }
+  .spacing-item { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); }
+  .spacing-item span { font-size: 0.75rem; color: var(--c-text-muted-on-dark); font-family: monospace; }
+
+  @media (max-width: 768px) {
+    .lib-2col, .lib-3col { grid-template-columns: 1fr; }
+    .specimen { grid-template-columns: 1fr; }
+    .specimen-meta { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header" id="top">
+    <div class="container header-inner">
+     <a href="#top" class="logo" aria-label="Apex — inicio">
+        <svg viewBox="0 0 1177.86 209.25" fill="currentColor" aria-hidden="true" focusable="false">
+          <path d="M153.74,0h86.9l59.87,209.25h-70.04l-9.88-38.07H63.55l34.64,10.68-17.98,27.39H0L153.74,0ZM208.08,122.06l-20.05-77.01-50.57,77.01h70.62Z"/>
+          <path d="M362.98,0h145.89c67.13,0,94.16,30.81,83.41,83.99-9.01,44.46-48.82,72.07-102.3,72.07h-91.84l-11.33,53.18h-68.88L362.98,0ZM489.11,102.01c22.67,0,34.29-5.52,38.36-23.25,3.78-17.44-5.52-23.54-28.19-23.54h-79.34l-10.17,46.79h79.34Z"/>
+          <path d="M637.31,0h213.31l-10.75,51.44h-143.86l-6.39,29.35h137.46l-9.88,47.08h-137.46l-6.39,29.93h143.86l-10.75,51.44h-213.9L637.31,0Z"/>
+          <path d="M957.28,101.72L875.03,0h80.79l50.57,66.84L1084.86,0h93l-133.1,110.44,80.5,98.81h-81.37l-51.73-66.55-75.56,66.55h-93.29l133.98-107.53Z"/>
+        </svg>
+      </a>
+
+      <nav class="primary-nav" id="primary-nav" aria-label="Navegación principal">
+        <ul>
+          <li><a href="#tipografia">Tipografía</a></li>
+          <li><a href="#color">Color</a></li>
+          <li><a href="#botones">Botones</a></li>
+          <li><a href="#cards">Cards</a></li>
+          <li><a href="#formularios">Formularios</a></li>
+          <li><a href="#componentes">Componentes</a></li>
+        </ul>
+      </nav>
+
+      <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Abrir menú de navegación">
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+      </button>
+    </div>
+  </header>
+
+
+<main>
+
+  <!-- INTRO -->
+  <section class="section section-dark">
+    <div class="container lib-intro">
+      <h1 style="font-size: clamp(2.75rem, 2rem + 4vw, 6rem);; margin-bottom: var(--space-3);">Biblioteca UI.</h1>
+    </div>
+  </section>
+
+  <!-- TIPOGRAFÍA -->
+  <section id="tipografia" class="section section-dark">
+    <div class="container">
+      <div class="section-head">
+        <h2>Tipografías.</h2>
+      </div>
+
+      <div class="lib-block">
+        <div class="lib-block-label">Jerarquías</div>
+
+        <div class="specimen">
+          <div class="specimen-sample"><h1 style="font-size: clamp(2.75rem, 2rem + 4vw, 6rem);">Título H1</h1></div>
+          <div class="specimen-meta"><b>H1</b>Space Grotesk 700<br>clamp(2.75rem, 2rem+4vw, 6rem)<br>uppercase · tracking -0.04em</div>
+        </div>
+
+        <div class="specimen">
+          <div class="specimen-sample"><h2>Título <span class="text-accent">H2</span></h2></div>
+          <div class="specimen-meta"><b>H2</b>Space Grotesk 600<br>clamp(1.875rem, 1.25rem+2.2vw, 3rem)<br>uppercase · tracking -0.03em</div>
+        </div>
+
+        <div class="specimen">
+          <div class="specimen-sample"><h3 style="font-size: 1.5rem;">H3 Subtítulo de card</h3></div>
+          <div class="specimen-meta"><b>H3</b>Inter 600<br>tamaño variable según uso<br>uppercase · tracking 0.02em</div>
+        </div>
+
+        <div class="specimen">
+          <div class="specimen-sample"><h4 style="font-size: 1.25rem;">H4 Título de bloque</h4></div>
+          <div class="specimen-meta"><b>H4</b>Inter 600<br>tamaño variable · sin uppercase</div>
+        </div>
+
+        <div class="specimen">
+          <div class="specimen-sample"><p style="font-size: 1.125rem; color: var(--c-text-muted-on-dark);">Body lead — texto de apoyo en section-head, 1.125rem</p></div>
+          <div class="specimen-meta"><b>Lead</b>Inter 400 · 1.125rem<br>line-height 1.6</div>
+        </div>
+
+        <div class="specimen">
+          <div class="specimen-sample"><p style="color: var(--c-text-muted-on-dark);">Body regular — párrafo estándar utilizado en la mayoría de las secciones del sitio.</p></div>
+          <div class="specimen-meta"><b>Body</b>Inter 400 · 1rem<br>line-height 1.6</div>
+        </div>
+
+        <div class="specimen">
+          <div class="specimen-sample"><span style="font-size: 0.875rem; color: var(--c-text-muted-on-dark);">Caption / texto pequeño — footer, meta, labels</span></div>
+          <div class="specimen-meta"><b>Caption</b>Inter 400–500 · 0.875rem</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COLOR -->
+  <section id="color" class="section section-light">
+    <div class="container">
+      <div class="section-head">
+        <h2>Paleta de <span class="text-accent">color</span>.</h2>
+      </div>
+
+      <div class="lib-block">
+        <div class="lib-block-label" style="color: var(--c-accent);">Base</div>
+        <div class="swatch-grid">
+          <div class="swatch">
+            <div class="swatch-color" style="background: #18181A;"></div>
+            <div class="swatch-info"><div class="swatch-name">Black</div><div class="swatch-code">#18181A</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: #232327;"></div>
+            <div class="swatch-info"><div class="swatch-name">Black Soft</div><div class="swatch-code">#232327</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: #F6F6FE;"></div>
+            <div class="swatch-info"><div class="swatch-name">Off-white</div><div class="swatch-code">#F6F6FE</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: #FFFFFF; border-bottom: 1px solid #eee;"></div>
+            <div class="swatch-info"><div class="swatch-name">White</div><div class="swatch-code">#FFFFFF</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lib-block">
+        <div class="lib-block-label" style="color: var(--c-accent);">Acento</div>
+        <div class="swatch-grid">
+          <div class="swatch">
+            <div class="swatch-color" style="background: #5900D8;"></div>
+            <div class="swatch-info"><div class="swatch-name">Accent</div><div class="swatch-code">#5900D8</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: #7B1FF0;"></div>
+            <div class="swatch-info"><div class="swatch-name">Accent Hover</div><div class="swatch-code">#7B1FF0</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background: rgba(89, 0, 216, 0.35); background-color:#232327; background-image: linear-gradient(rgba(89,0,216,0.35), rgba(89,0,216,0.35));"></div>
+            <div class="swatch-info"><div class="swatch-name">Accent Soft</div><div class="swatch-code">rgba(89,0,216,0.35)</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lib-block">
+        <div class="lib-block-label" style="color: var(--c-accent);">Texto</div>
+        <div class="swatch-grid">
+          <div class="swatch">
+            <div class="swatch-color" style="background:#18181A; display:flex; align-items:center; justify-content:center; color:#F6F6FE; font-family: var(--font-body); font-size:0.875rem;">Aa</div>
+            <div class="swatch-info"><div class="swatch-name">Text on dark</div><div class="swatch-code">#F6F6FE</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#18181A; display:flex; align-items:center; justify-content:center; color:rgba(246,246,254,0.72); font-family: var(--font-body); font-size:0.875rem;">Aa</div>
+            <div class="swatch-info"><div class="swatch-name">Muted on dark</div><div class="swatch-code">rgba(246,246,254,.72)</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#F6F6FE; display:flex; align-items:center; justify-content:center; color:#18181A; font-family: var(--font-body); font-size:0.875rem;">Aa</div>
+            <div class="swatch-info"><div class="swatch-name">Text on light</div><div class="swatch-code">#18181A</div></div>
+          </div>
+          <div class="swatch">
+            <div class="swatch-color" style="background:#F6F6FE; display:flex; align-items:center; justify-content:center; color:#54545F; font-family: var(--font-body); font-size:0.875rem;">Aa</div>
+            <div class="swatch-info"><div class="swatch-name">Muted on light</div><div class="swatch-code">#54545F</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lib-block">
+        <div class="lib-block-label" style="color: var(--c-accent);">Radios de borde</div>
+        <div class="demo-row">
+          <div class="radius-demo" style="border-radius: 8px;">sm · 8px</div>
+          <div class="radius-demo" style="border-radius: 16px;">md · 16px</div>
+          <div class="radius-demo" style="border-radius: 24px;">lg · 24px</div>
+          <div class="radius-demo" style="border-radius: 999px;">pill</div>
+        </div>
+      </div>
+
+      <div class="lib-block">
+        <div class="lib-block-label" style="color: var(--c-accent);">Escala de espaciado (base 8px)</div>
+        <div class="spacing-demo">
+          <div class="spacing-item"><div class="spacing-bar" style="height:8px;"></div><span>8</span></div>
+          <div class="spacing-item"><div class="spacing-bar" style="height:16px;"></div><span>16</span></div>
+          <div class="spacing-item"><div class="spacing-bar" style="height:24px;"></div><span>24</span></div>
+          <div class="spacing-item"><div class="spacing-bar" style="height:32px;"></div><span>32</span></div>
+          <div class="spacing-item"><div class="spacing-bar" style="height:40px;"></div><span>40</span></div>
+          <div class="spacing-item"><div class="spacing-bar" style="height:48px;"></div><span>48</span></div>
+          <div class="spacing-item"><div class="spacing-bar" style="height:56px;"></div><span>56</span></div>
+          <div class="spacing-item"><div class="spacing-bar" style="height:64px;"></div><span>64</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOTONES -->
+  <section id="botones" class="section section-light">
+    <div class="container">
+      <div class="section-head">
+        <h2>Botones.</h2>
+      </div>
+
+      <div class="lib-block">
+        <div class="lib-block-label">btn-primary</div>
+        <div class="demo-row">
+          <a href="#" class="btn btn-primary">Quiero entrar<svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <a href="#" class="btn btn-primary btn-sm">Ver más</a>
+        </div>
+        <p class="demo-caption">Estado normal: fondo violeta / texto blanco. Hover: invierte a fondo blanco / texto violeta, con trazo animado (conic-gradient) dibujándose en el borde.</p>
+      </div>
+
+      <div class="lib-block">
+        <div class="lib-block-label">btn-light</div>
+        <div class="demo-row" style="background: var(--c-offwhite); padding: var(--space-4); border-radius: var(--radius-md);">
+          <a href="#" class="btn btn-light">Conocer el programa</a>
+        </div>
+        <p class="demo-caption">Fondo blanco / texto violeta. Hover invierte a fondo violeta / texto blanco. Usado sobre fondos oscuros o imágenes.</p>
+      </div>
+
+      <div class="lib-block">
+        <div class="lib-block-label">Botones circulares (carrusel / navegación)</div>
+        <div class="demo-row">
+          <button class="carousel-arrow" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button class="carousel-arrow" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button class="carousel-arrow" disabled aria-label="Deshabilitado"><svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button class="back-to-top visible" style="position: static;" aria-label="Volver arriba"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+        <p class="demo-caption">Border 3px accent-soft, se rellena de violeta en hover con leve translateY. Último ejemplo: botón "volver arriba" (fondo violeta sólido).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CARDS -->
+  <section id="cards" class="section section-dark">
+    <div class="container">
+      <div class="section-head">
+        <h2>Cards.</h2>
+      </div>
+
+      <div class="lib-block">
+        <div class="lib-block-label" style="color: var(--c-accent-hover);">Card genérica (.card / .card-purple)</div>
+        <div class="lib-3col">
+          <div class="card card-purple">
+            <svg class="card-icon" style="width:32px;height:32px;margin-bottom:var(--space-2);" viewBox="0 0 24 24" fill="none"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4.5L6 21l1.5-7.5L2 9h7l3-7z" fill="currentColor"/></svg>
+            <h3 style="text-transform:none; font-size:1.25rem;">Card violeta</h3>
+            <p>Fondo accent sólido, texto blanco.</p>
+          </div>
+          <div class="card" style="background: var(--c-white); border: 3px solid var(--c-accent);">
+            <h3 style="text-transform:none; font-size:1.25rem; color:var(--c-black); margin-bottom: var(--space-2);">Card con borde</h3>
+            <p style="color: var(--c-text-muted-on-light);">Fondo blanco, borde 3px accent. Radius-md, padding space-4.</p>
+          </div>
+          <div class="objective-card">
+            <div class="objective-num">01</div>
+            <div class="objective-title">Objective card</div>
+            <p class="section-paragraph" style="color: var(--c-text-on-dark); margin:0;">Border 3px black-soft; hover invierte a fondo violeta.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="lib-block">
+        <div class="lib-block-label" style="color: var(--c-accent-hover);">Flip card (tap)</div>
+        <ul class="card-grid card-grid-2" role="list">
+        <li class="card card-purple">
+          <button class="flip-card-trigger" type="button" aria-pressed="false" aria-label="Ver detalle: Simuladores Direct Drive">
+            <div class="flip-card-inner">
+              <div class="flip-card-front">
+                <img src="assets/tec-direct-drive.png" alt="" loading="lazy">
+                <span class="flip-card-cta">Ver detalles <span class="arrow" aria-hidden="true">→</span></span>
+              </div>
+              <div class="flip-card-back">
+                <svg class="card-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M0 0h24v24H0z" fill="none" />
+                  <g fill="none" fill-rule="evenodd">
+                    <path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z" />
+                    <path fill="currentColor" d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2M8.313 14.781c-1.044-.835-2.46-1.158-4.108-.972a8.01 8.01 0 0 0 6.254 6.043c-.193-2.625-1.056-4.2-2.146-5.07Zm7.374 0c-1.09.872-1.953 2.446-2.146 5.07a8.01 8.01 0 0 0 6.253-6.042c-1.647-.186-3.063.137-4.107.972M12 10c-.95 0-1.732.37-2.306.778l-.498.347c-.524.355-1.126.72-1.801.96a6.4 6.4 0 0 1 2.167 1.134c1.124.9 1.953 2.187 2.438 3.859c.485-1.672 1.314-2.96 2.438-3.859a6.4 6.4 0 0 1 2.167-1.133c-.675-.241-1.277-.606-1.801-.961l-.498-.347C13.732 10.37 12.95 10 12 10m0-6a8 8 0 0 0-7.862 6.513l-.043.248l2.21-.442c.582-.116 1.135-.423 1.753-.84l.477-.332C9.332 8.581 10.513 8 12 8c1.388 0 2.509.506 3.3 1.034l.642.445c.54.365 1.032.645 1.536.788l.217.052l2.21.442A8 8 0 0 0 12 4" />
+                  </g>
+                </svg>
+                <h3>Simuladores Direct Drive</h3>
+                <p>Volantes con torque calibrado de hasta 25 nm. Feedback de fuerza que replica con precisión lo que siente un piloto real en cada metro de pista.</p>
+              </div>
+            </div>
+          </button>
+        </li>
+        </ul>
+        <p class="demo-caption">Interacción: click agrega clase <code>.is-flipped</code> al contenedor <code>.flip-card-inner</code>.</p>
+      </div>
+
+      <div class="lib-block">
+        <div class="lib-block-label" style="color: var(--c-accent-hover);">Format card (pricing / planes)</div>
+        <div class="lib-3col" style="padding: var(--space-4); border-radius: var(--radius-md);">
+          <div class="format-card">
+          <div class="format-copy">
+            <h3 style="color: var(--c-white);">Liga Interna<br> de Desarrollo</h3>
+            <ul class="format-argument-list">
+              <li style="color: var(--c-text-on-dark);"><span class="argument-marker" aria-hidden="true">01</span>Temporada oficial.</li>
+              <li style="color: var(--c-text-on-dark);"><span class="argument-marker" aria-hidden="true">02</span>Sistema de puntos.</li>
+              <li style="color: var(--c-text-on-dark);"><span class="argument-marker" aria-hidden="true">03</span>Análisis post-carrera.</li>
+              <li style="color: var(--c-text-on-dark);"><span class="argument-marker" aria-hidden="true">04</span>Seguimiento de progresión.</li>
+            </ul>
+            <div class="format-footer">
+                <span class="format-price">
+                  <span class="format-price-amount" style="color: var(--c-text-on-dark);">$349.000</span>
+                  <span class="format-price-detail" style="color: var(--c-text-muted-on-dark);">8 semanas</span>
+                </span>
+                <a href="detalle.html" class="btn btn-primary btn-sm">Ver Calendario <span class="arrow" aria-hidden="true">→</span></a>
+            </div>
+          </div>
+        </div>
+
+        <div class="format-card card-purple format-card-featured">
+          <span class="format-badge">Experiencia destacada</span>
+          <div class="format-copy">
+            <h3>Equal Grid</h3>
+            <ul class="format-argument-list">
+              <li><span class="argument-marker" aria-hidden="true">01</span>Telemetría y coaching técnico.</li>
+              <li><span class="argument-marker" aria-hidden="true">02</span>Preparación físico-mental.</li>
+              <li><span class="argument-marker" aria-hidden="true">03</span>Competencias supervisadas.</li>
+            </ul>
+            <div class="format-footer">
+                <span class="format-price">
+                  <span class="format-price-amount">$990.000</span>
+                  <span class="format-price-detail">12 semanas</span>
+                </span>
+                <a href="detalle.html" class="btn btn-light btn-sm">Conocer Equal Grid <span class="arrow" aria-hidden="true">→</span></a>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      <div class="lib-block">
+        <div class="lib-block-label" style="color: var(--c-accent);">Testimonial card</div>
+        <div style="background: var(--c-black); padding: var(--space-4); border-radius: var(--radius-md); max-width: 420px;">
+          <blockquote class="testimonial-card testimonial" style="margin:0;">
+            <svg class="testimonial-quote" viewBox="0 0 24 24" fill="currentColor"><path d="M7 6c-2.2 0-4 1.8-4 4v8h8v-8H7.6c.2-1.7 1.6-3 3.4-3V6H7Zm10 0c-2.2 0-4 1.8-4 4v8h8v-8h-3.4c.2-1.7 1.6-3 3.4-3V6h-4Z"/></svg>
+            <p>"Mejoré 1.2s por vuelta en cuatro semanas de entrenamiento sistemático."</p>
+            <footer><cite>Nombre Apellido</cite><span>Categoría / equipo</span></footer>
+          </blockquote>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FORMULARIOS -->
+  <section id="formularios" class="section section-dark">
+    <div class="container">
+      <div class="section-head">
+        <h2>Formularios.</h2>
+      </div>
+
+      <div class="lib-block" style="max-width: 480px;">
+        <div class="contact-form-container">
+          <div class="form-group">
+            <label class="form-label" for="lib-name">Nombre completo</label>
+            <input class="form-input" id="lib-name" type="text" placeholder="Tu nombre">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="lib-select">Programa de interés</label>
+            <select class="form-input form-select" id="lib-select">
+              <option>Entrenamiento individual</option>
+              <option>Equal Grid</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <div class="textarea-label-wrapper">
+              <label class="form-label" for="lib-msg">Mensaje</label>
+              <span class="char-counter">0/280</span>
+            </div>
+            <textarea class="form-input form-textarea" id="lib-msg" placeholder="Contanos tu objetivo"></textarea>
+          </div>
+          <p class="form-disclaimer-required">* Campos obligatorios</p>
+          <p class="form-disclaimer-privacy">Al enviar aceptás nuestra política de privacidad.</p>
+          <button class="btn btn-primary w-full" style="justify-content:center;" type="button">Enviar</button>
+        </div>
+      </div>
+      <p class="demo-caption">Inputs: fondo negro, borde 1px sutil, focus cambia borde a accent. Selects usan flecha SVG inline en accent.</p>
+
+      <div class="lib-block">
+        <div class="lib-block-label">Newsletter pill</div>
+        <div class="newsletter-input-wrap" style="max-width:400px;">
+          <input type="email" placeholder="tu@email.com">
+          <button type="button" aria-label="Enviar">→</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- IMÁGENES -->
+  <section id="imagenes" class="section section-dark">
+    <div class="container">
+      <div class="section-head">
+        <h2>Tratamiento de <span class="text-accent">imágenes</span>.</h2>
+      </div>
+
+      <div class="lib-block">
+        <div class="lib-block-label" style="color: var(--c-accent);">Ratios de galería</div>
+        <div class="lib-3col">
+          <div>
+              <figure class="gallery-item ratio-16x9 col-wide" data-aos="fade-up" style="margin: 0 0 0 0; ">
+              <img src="assets/galeria-01.png" alt="" loading="lazy">
+                </figure>
+              <p class="demo-caption">.ratio-16x9</p></div>
+          <div>
+            <figure class="gallery-item ratio-1x1 col-narrow" data-aos="fade-up" style="transition-delay: 0.12s; margin: 0;">
+              <img src="assets/galeria-02.png" alt="" loading="lazy">
+            </figure>  
+            <p class="demo-caption">.ratio-1x1</p></div>
+          <div>
+            <figure class="gallery-item ratio-4x5 col-wide" data-aos="fade-up" style="margin: 0;">
+              <img src="assets/galeria-04.png" alt="" loading="lazy">
+            </figure>
+            <p class="demo-caption">.ratio-4x5</p></div>
+        </div>
+        <p class="demo-caption">Todas con radius-md, border 2px accent, hover aplica scale(1.078) sobre la imagen interna.</p>
+      </div>
+
+      <div class="lib-block">
+        <div class="lib-block-label" style="color: var(--c-accent);">Card + reveal con hover</div>
+        <ul class="team-grid" id="teamCarousel" role="list" style="max-width: 320px;">
+          <!-- Miembro 1 -->
+          <li class="team-card">
+            <button class="stat-reveal" type="button">
+              <img src="assets/rodrigo-salas.png" alt="Rodrigo Salas" loading="lazy" class="placeholder-gray">
+              <span class="stat-reveal-hint" aria-hidden="true">+</span>
+              <span class="stat-reveal-overlay">
+                <span class="team-name">Rodrigo Salas</span>
+                <span class="team-role">Director Técnico y head coach de pilotaje</span>
+              </span>
+            </button>
+          </li>
+          </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- COMPONENTES -->
+  <section id="componentes" class="section section-dark">
+    <div class="container">
+      <div class="section-head">
+        <h2>Otros componentes.</h2>
+      </div>
+
+    <div class="lib-block-label">Stepper</div>
+      <div class="stepper" style="margin-bottom: var(--space-8);" id="stepper" role="tablist" aria-label="Etapas del método Apex">
+          <button type="button" class="step active" data-index="0" role="tab" aria-selected="true" aria-controls="step-body">
+            <span class="step-connector" aria-hidden="true"></span>
+            <span class="step-inner">
+              <span class="step-dot">01</span>
+              <span class="step-label" style="color: var(--c-text-on-dark);">Assessment</span>
+              <span class="step-title" style="color: var(--c-text-on-dark);">Diagnóstico de base</span>
+            </span>
+          </button>
+          <button type="button" class="step" data-index="1" role="tab" aria-selected="false" aria-controls="step-body">
+            <span class="step-connector" aria-hidden="true"></span>
+            <span class="step-inner">
+              <span class="step-dot">02</span>
+              <span class="step-label" style="color: var(--c-text-muted-on-dark);">Telemetría</span>
+              <span class="step-title" style="color: var(--c-text-muted-on-dark);">Análisis en datos</span>
+            </span>
+          </button>
+          <button type="button" class="step" data-index="2" role="tab" aria-selected="false" aria-controls="step-body">
+            <span class="step-connector" aria-hidden="true"></span>
+            <span class="step-inner">
+              <span class="step-dot">03</span>
+              <span class="step-label" style="color: var(--c-text-muted-on-dark);">Entrenamiento</span>
+              <span class="step-title" style="color: var(--c-text-muted-on-dark);">Mejora sistemática</span>
+            </span>
+          </button>
+          <button type="button" class="step" data-index="3" role="tab" aria-selected="false" aria-controls="step-body">
+            <span class="step-connector" aria-hidden="true"></span>
+            <span class="step-inner">
+              <span class="step-dot">04</span>
+              <span class="step-label" style="color: var(--c-text-muted-on-dark);">Competencia</span>
+              <span class="step-title" style="color: var(--c-text-muted-on-dark);">Presión real</span>
+            </span>
+          </button>
+        </div>
+
+      <div class="lib-block">
+        <div class="lib-block-label">FAQ acordeón</div>
+        <div class="faq-list">
+          <div class="faq-list">
+          <div class="faq-item">
+            <button class="faq-trigger" aria-expanded="false" aria-controls="faq-answer-1">
+              <span class="faq-number">01</span>
+              <span class="faq-question">¿Necesito experiencia previa para aplicar?</span>
+              <span class="faq-icon-wrapper">
+                <svg class="faq-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </span>
+            </button>
+            <div class="faq-panel" id="faq-answer-1" hidden>
+              <div class="faq-content">
+                <p>No es un requisito excluyente, pero sí buscamos participantes con motivación y disciplina. El Módulo 1 está diseñado para establecer bases técnicas sólidas desde cero, pero el programa exige compromiso y disposición para trabajar con datos.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-trigger" aria-expanded="false" aria-controls="faq-answer-2">
+              <span class="faq-number">02</span>
+              <span class="faq-question">¿El programa tiene costo?</span>
+              <span class="faq-icon-wrapper">
+                <svg class="faq-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </span>
+            </button>
+            <div class="faq-panel" id="faq-answer-2" hidden>
+              <div class="faq-content">
+                <p>Equal Grid es un programa de pago con aranceles accesibles y posibilidad de becas parciales. Trabajamos con WIGArg para identificar casos donde las barreras económicas no sean un obstáculo para el acceso al talento. Podes consultar su disponibilidad.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+        <div class="lib-block-label">Timeline</div>
+          
+        <div id="curriculum-timeline" style="background-color: var(--c-offwhite);">
+        <div class="curr-item" style="background: rgba(35, 35, 39,0.06);">
+          <div class="curr-num">
+            <p class="curr-num-label">M01</p>
+          </div>
+          <div class="curr-content">
+            <h3>Fundamentos Técnicos</h3>
+            <p class="curr-difficulty">Dificultad: <span>Inicial</span></p>
+            <p class="curr-weeks">Semana 1 – 3</p>
+
+            <p class="curr-block-label">Habilidades Adquiridas</p>
+            <ul class="curr-list">
+              <li>Setup de cockpit</li>
+              <li>Ergonomía de pilotaje</li>
+              <li>Técnica de frenada</li>
+              <li>Control de aceleración</li>
+            </ul>
+
+            <p class="curr-block-label">Métricas del Piloto</p>
+            <ul class="curr-metrics">
+              <li><span class="metric-name">Consistencia</span><span class="metric-bar"><span style="width:75%"></span></span><span class="metric-value">+30</span></li>
+              <li><span class="metric-name">Precisión</span><span class="metric-bar"><span style="width:62%"></span></span><span class="metric-value">+25</span></li>
+              <li><span class="metric-name">Control</span><span class="metric-bar"><span style="width:50%"></span></span><span class="metric-value">+20</span></li>
+              <li><span class="metric-name">Confianza</span><span class="metric-bar"><span style="width:25%"></span></span><span class="metric-value">+10</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="curr-item">
+          <div class="curr-num">
+            <p class="curr-num-label">M02</p>
+          </div>
+          <div class="curr-content">
+            <h3>Rendimiento Bajo Análisis</h3>
+            <p class="curr-difficulty">Dificultad: <span>Intermedia</span></p>
+            <p class="curr-weeks">Semana 4 – 6</p>
+
+            <p class="curr-block-label">Habilidades Adquiridas</p>
+            <ul class="curr-list">
+              <li>Análisis de telemetría</li>
+              <li>Gestión del error</li>
+              <li>Rutinas de foco</li>
+              <li>Trabajo con coach</li>
+            </ul>
+
+            <p class="curr-block-label">Métricas del Piloto</p>
+            <ul class="curr-metrics">
+              <li><span class="metric-name">Ritmo</span><span class="metric-bar"><span style="width:75%"></span></span><span class="metric-value">+30</span></li>
+              <li><span class="metric-name">Consistencia</span><span class="metric-bar"><span style="width:62%"></span></span><span class="metric-value">+25</span></li>
+              <li><span class="metric-name">Precisión</span><span class="metric-bar"><span style="width:50%"></span></span><span class="metric-value">+20</span></li>
+              <li><span class="metric-name">Análisis</span><span class="metric-bar"><span style="width:37%"></span></span><span class="metric-value">+15</span></li>
+            </ul>
+          </div>
+        </div>
+        </div>
+      </div>
+      </div>
+
+  </section>
+
+</main>
+
+<footer class="site-footer">
+    <div class="container footer-inner">
+      <nav class="footer-col" aria-label="Apex">
+        <h2 class="footer-heading">Apex</h2>
+        <ul>
+          <li><a href="#diferencia">Acerca de</a></li>
+          <li><a href="detalle.html">Equal Grid</a></li>
+          <li><a href="#contacto">Contacto</a></li>
+          <li><a href="biblioteca.html">Biblioteca</a></li>
+        </ul>
+      </nav>
+
+      <nav class="footer-col" aria-label="Redes sociales">
+        <h2 class="footer-heading">Redes</h2>
+        <ul>
+          <li><a href="#" target="_blank" rel="noopener">Instagram</a></li>
+          <li><a href="#" target="_blank" rel="noopener">TikTok</a></li>
+          <li><a href="#" target="_blank" rel="noopener">Facebook</a></li>
+          <li><a href="#" target="_blank" rel="noopener">X (Twitter)</a></li>
+        </ul>
+      </nav>
+
+      <address class="footer-col footer-address">
+        <p>Asunción 2909,CABA</p>
+        <p><a href="tel:+5491122942520">+54 9 11 2294 2520</a></p>
+        <p><a href="mailto:info@apex.com">info@apex.com</a></p>
+      </address>
+    </div>
+
+     <svg class="footer-wordmark" viewBox="0 0 1177.86 209.25" fill="currentColor" aria-hidden="true" focusable="false">
+      <path d="M153.74,0h86.9l59.87,209.25h-70.04l-9.88-38.07H63.55l34.64,10.68-17.98,27.39H0L153.74,0ZM208.08,122.06l-20.05-77.01-50.57,77.01h70.62Z"/>
+      <path d="M362.98,0h145.89c67.13,0,94.16,30.81,83.41,83.99-9.01,44.46-48.82,72.07-102.3,72.07h-91.84l-11.33,53.18h-68.88L362.98,0ZM489.11,102.01c22.67,0,34.29-5.52,38.36-23.25,3.78-17.44-5.52-23.54-28.19-23.54h-79.34l-10.17,46.79h79.34Z"/>
+      <path d="M637.31,0h213.31l-10.75,51.44h-143.86l-6.39,29.35h137.46l-9.88,47.08h-137.46l-6.39,29.93h143.86l-10.75,51.44h-213.9L637.31,0Z"/>
+      <path d="M957.28,101.72L875.03,0h80.79l50.57,66.84L1084.86,0h93l-133.1,110.44,80.5,98.81h-81.37l-51.73-66.55-75.56,66.55h-93.29l133.98-107.53Z"/>
+    </svg>
+  </footer>
+
+    <button type="button" id="backToTop" class="back-to-top" aria-label="Volver arriba">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+
+<script src="script.js"></script>
+
+</body>
+</html>
